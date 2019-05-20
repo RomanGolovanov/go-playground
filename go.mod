@@ -1,4 +1,4 @@
-module github.com/RomanGolovanov/go-playground
+module go-playground
 
 require (
 	github.com/julienschmidt/httprouter v1.2.0

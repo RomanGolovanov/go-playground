@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/RomanGolovanov/go-playground/api"
+	"go-playground/api"
 )
 
 func main() {
-	api.RunServer("", 8080)
+	api.RunServer("localhost", 8080)
 }
