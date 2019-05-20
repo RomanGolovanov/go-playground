@@ -39,8 +39,10 @@ func GetDesk(name string) (Desk, bool) {
 }
 
 // DeleteDesk deletes desk by name
-func DeleteDesk(name string) {
+func DeleteDesk(name string) bool {
+	_, ok := desks[name]
 	delete(desks, name)
+	return ok
 }
 
 // GetAllDesks return all desks
