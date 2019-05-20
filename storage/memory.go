@@ -11,8 +11,9 @@ type MemoryDeskStorage struct {
 }
 
 // NewDesk adds new desk to repo
-func (storage MemoryDeskStorage) NewDesk(desk model.Desk) {
+func (storage MemoryDeskStorage) NewDesk(desk model.Desk) bool {
 	storage.desks[desk.Name] = desk
+	return true
 }
 
 // GetDesk returns desk by name

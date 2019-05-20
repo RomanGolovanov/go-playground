@@ -12,7 +12,7 @@ import (
 
 // IDeskStorage should be implemented to process api requests
 type IDeskStorage interface {
-	NewDesk(desk model.Desk)
+	NewDesk(desk model.Desk) bool
 	GetDesk(name string) (model.Desk, bool)
 	DeleteDesk(name string) bool
 	GetAllDesks() []model.Desk
