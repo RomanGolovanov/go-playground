@@ -2,7 +2,7 @@ package api
 
 import (
 	"encoding/json"
-	model "github.com/RomanGolovanov/go-playground/model"
+	"github.com/RomanGolovanov/go-playground/model"
 	"github.com/julienschmidt/httprouter"
 	"log"
 	"net/http"

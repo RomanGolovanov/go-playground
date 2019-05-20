@@ -1,7 +1,7 @@
 package main
 
 import (
-	api "github.com/RomanGolovanov/go-playground/api"
+	"github.com/RomanGolovanov/go-playground/api"
 )
 
 func main() {
