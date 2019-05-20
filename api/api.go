@@ -10,13 +10,21 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-func getDesk(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+// IDeskStorage should be implemented to process api requests
+type IDeskStorage interface {
+	NewDesk(desk model.Desk)
+	GetDesk(name string) (model.Desk, bool)
+	DeleteDesk(name string) bool
+	GetAllDesks() []model.Desk
+}
+
+func getDesk(w http.ResponseWriter, r *http.Request, ps httprouter.Params, storage IDeskStorage) {
 	name := ps.ByName("id")
 	if name == "" {
 		http.Error(w, "Invalid desk name", http.StatusBadRequest)
 		return
 	}
-	desk, ok := model.GetDesk(name)
+	desk, ok := storage.GetDesk(name)
 	if !ok {
 		http.NotFound(w, r)
 		return
@@ -25,13 +33,13 @@ func getDesk(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	json.NewEncoder(w).Encode(desk)
 }
 
-func deleteDesk(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func deleteDesk(w http.ResponseWriter, r *http.Request, ps httprouter.Params, storage IDeskStorage) {
 	name := ps.ByName("id")
 	if name == "" {
 		http.Error(w, "Invalid desk name", http.StatusBadRequest)
 		return
 	}
-	ok := model.DeleteDesk(name)
+	ok := storage.DeleteDesk(name)
 	if !ok {
 		http.NotFound(w, r)
 		return
@@ -39,13 +47,13 @@ func deleteDesk(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	http.StatusText(http.StatusNoContent)
 }
 
-func getDeskIndex(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	desks := model.GetAllDesks()
+func getDeskIndex(w http.ResponseWriter, r *http.Request, _ httprouter.Params, storage IDeskStorage) {
+	desks := storage.GetAllDesks()
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(desks)
 }
 
-func createOrUpdateDesk(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func createOrUpdateDesk(w http.ResponseWriter, r *http.Request, _ httprouter.Params, storage IDeskStorage) {
 	if r.Body == nil {
 		http.Error(w, "Invalid request", http.StatusBadRequest)
 		return
@@ -56,18 +64,26 @@ func createOrUpdateDesk(w http.ResponseWriter, r *http.Request, _ httprouter.Par
 		http.Error(w, "Invalid body format", http.StatusBadRequest)
 		return
 	}
-	model.NewDesk(desk)
+	storage.NewDesk(desk)
 	http.StatusText(http.StatusNoContent)
 }
 
 // RunServer starts api listener
-func RunServer(hostName string, port int) {
+func RunServer(hostName string, port int, storage IDeskStorage) {
 	router := httprouter.New()
 
-	router.GET("/api/1.0/desk/:id", getDesk)
-	router.DELETE("/api/1.0/desk/:id", deleteDesk)
-	router.POST("/api/1.0/desk", createOrUpdateDesk)
-	router.GET("/api/1.0/desk", getDeskIndex)
+	router.GET("/api/1.0/desk/:id", func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+		getDesk(w, r, ps, storage)
+	})
+	router.DELETE("/api/1.0/desk/:id", func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+		deleteDesk(w, r, ps, storage)
+	})
+	router.POST("/api/1.0/desk", func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+		createOrUpdateDesk(w, r, ps, storage)
+	})
+	router.GET("/api/1.0/desk", func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+		getDeskIndex(w, r, ps, storage)
+	})
 
 	address := hostName + ":" + strconv.Itoa(port)
 
