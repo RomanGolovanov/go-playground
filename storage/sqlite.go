@@ -65,7 +65,7 @@ func (storage SqliteDeskStorage) GetDesk(name string) (model.Desk, bool) {
 // DeleteDesk deletes desk by name
 func (storage SqliteDeskStorage) DeleteDesk(name string) bool {
 	_, err := storage.delete.Exec(name)
-	return err != nil
+	return err == nil
 }
 
 // GetAllDesks return all desks

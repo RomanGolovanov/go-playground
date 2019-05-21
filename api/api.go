@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"go-playground/model"
 	"log"
 	"net/http"
@@ -86,6 +87,7 @@ type storageDependentHandle func(http.ResponseWriter, *http.Request, httprouter.
 
 func wrapHandle(handle storageDependentHandle, storage IDeskStorage) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+		fmt.Println("Requested", r.Method, r.URL)
 		handle(w, r, ps, storage)
 	}
 }
