@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	db := storage.CreateSqliteDeskStorage("test.db")
+	db := storage.CreateSqliteDeskStorage("test.sqlite")
 	defer db.Close()
 
 	api.RunServer("localhost", 8080, db)
