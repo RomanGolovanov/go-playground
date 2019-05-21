@@ -72,20 +72,20 @@ func createOrUpdateDesk(w http.ResponseWriter, r *http.Request, _ httprouter.Par
 func RunServer(hostName string, port int, storage IDeskStorage) {
 	router := httprouter.New()
 
-	router.GET("/api/1.0/desk/:id", func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-		getDesk(w, r, ps, storage)
-	})
-	router.DELETE("/api/1.0/desk/:id", func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-		deleteDesk(w, r, ps, storage)
-	})
-	router.POST("/api/1.0/desk", func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-		createOrUpdateDesk(w, r, ps, storage)
-	})
-	router.GET("/api/1.0/desk", func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-		getDeskIndex(w, r, ps, storage)
-	})
+	router.GET("/api/1.0/desk/:id", wrapHandle(getDesk, storage))
+	router.DELETE("/api/1.0/desk/:id", wrapHandle(deleteDesk, storage))
+	router.POST("/api/1.0/desk", wrapHandle(createOrUpdateDesk, storage))
+	router.GET("/api/1.0/desk", wrapHandle(getDeskIndex, storage))
 
 	address := hostName + ":" + strconv.Itoa(port)
 
 	log.Fatal(http.ListenAndServe(address, router))
+}
+
+type storageDependentHandle func(http.ResponseWriter, *http.Request, httprouter.Params, IDeskStorage)
+
+func wrapHandle(handle storageDependentHandle, storage IDeskStorage) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+		handle(w, r, ps, storage)
+	}
 }
